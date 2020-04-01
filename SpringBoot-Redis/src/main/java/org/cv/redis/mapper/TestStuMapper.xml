@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.cv.redis.mapper.TestStuMapper">
+    <!--添加单个学生对象 id:对应Mapper接口函数名 parameterType：入参类型-->
+    <insert id="addStu" parameterType="TestStu">
+        insert into test_stu (name, date) values (#{name},#{date})
+    </insert>
+
+    <!--
+        批量添加 foreach 循环添加
+        collection：
+            分为两种一种是数组,如传入的是数组则对应的是 array
+            还有就是list
+        item:
+            将当前遍历出的元素赋值给指定的变量,然后用#{变量名},就能取出变量的值,也就是当前遍历出的元素
+        index:
+            索引
+        separator：
+            每个元素之间的分隔符
+    -->
+    <insert id="addStuList">
+        insert into test_stu (name,date) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name},#{item.date})
+        </foreach>
+    </insert>
+</mapper>
