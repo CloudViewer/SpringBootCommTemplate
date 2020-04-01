@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SpringBoot-Ehcache/SpringBoot-Ehcache.iml" filepath="$PROJECT_DIR$/SpringBoot-Ehcache/SpringBoot-Ehcache.iml" />
       <module fileurl="file://$PROJECT_DIR$/SpringBoot-Redis/SpringBoot-Redis.iml" filepath="$PROJECT_DIR$/SpringBoot-Redis/SpringBoot-Redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SpringBoot-WebSocket/SpringBoot-WebSocket.iml" filepath="$PROJECT_DIR$/SpringBoot-WebSocket/SpringBoot-WebSocket.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/SpringBootCommTemplate.iml" filepath="$PROJECT_DIR$/.idea/SpringBootCommTemplate.iml" />
     </modules>
   </component>
