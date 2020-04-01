@@ -3,5 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/SpringBoot-Ehcache/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SpringBoot-Redis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SpringBoot-WebSocket/src/main/java" charset="UTF-8" />
   </component>
 </project>
