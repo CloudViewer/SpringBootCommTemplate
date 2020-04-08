@@ -3,18 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <title>SpringBoot-WebSocket:客服端</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/comm.css" />
+    <script src="../static/js/comm.js"></script>
 
-    <script>
-        function onConnect() {
-            console.log('连接成功...')
+    <style>
+
+        *{
+            margin: 0px;
+            padding: 0px;
+            font-family: '微软雅黑';
         }
-
-    </script>
+        body{
+            width: 100%;
+            height: 100%;
+        }
+        #canvas{
+            position: absolute;
+        }
+    </style>
 </head>
 <body>
-    <div>
-        <button onclick="onConnect()">点我连接</button>
+    <div class="flex-column mx-start sx-stretch" style="width:100%;height: 100%;">
+        <div style="flex: 0 0 auto;height: 35px;">A</div>
+        <div style="flex: 0 0 auto;height: 35px;">B</div>
+        <div style="flex: 0 0 auto;height: 35px;">C</div>
+        <div class="flex-txt-center" style="flex: 0 0 auto;height: 35px;">
+            <H3>欢迎进入直播间...</H3>
+        </div>
+        <div class="flex-row mx-evenly sx-start" style="flex: 0 0 auto;height: 35px;">
+            <div style="flex: 0 0 auto;">当前在线人数：99</div>
+            <div style="flex: 0 0 auto;"><a href="javaScript;">退出直播间</a></div>
+        </div>
+        <div class="flex-txt-center" style="flex: 0 0 auto;height: 35px; height: 360px;">
+                <canvas id="canvas"></canvas>
+                <video id="video" width="800px;" height="330;" src="../static/video/video_text.mp4" controls></video>
+        </div>
+        <div class="flex-row mx-center sx-center" style="flex: 0 0 auto;height: 45px; border: 1px solid red;">
+            <div style="flex: 0 0 auto;margin-left: 10px;">
+                <input type="text" id="text"/>
+            </div>
+            <div style="flex: 0 0 auto;margin-left: 10px;">
+                <button id="btn">发送弹幕</button>
+            </div>
+            <div style="flex: 0 0 auto;margin-left: 10px;">
+                <input type="color" id="color" />
+            </div>
+        </div>
     </div>
 
+    <script type="text/javascript">
+        /**
+         * 弹幕数据
+         * value:弹幕值，
+         * speed:弹幕前进速度，
+         * time:弹幕出现时间，
+         * color：弹幕颜色，
+         * fontSize：字体大小
+         */
+        let data = [
+            {value:'测试弹幕1',speed:2,time:1,color:'red',fontSize:20},
+            {value:'太好听',time: 2},
+            {value:'ilil',time: 3},
+            {value:'完美',time: 4},
+            {value:'爱了爱了',time: 5},
+            {value:'测试弹幕',time: 6},
+
+        ]
+
+        let $ = document.querySelector.bind(document);
+        let canvas = $('#canvas');
+        let video = $('#video');
+
+
+        class Barrage {
+            constructor(obj,ctx) {
+                this.value = obj.value; // 这是弹幕内容
+                this.time = obj.time;   // 这是弹幕时间
+                this.obj = obj;
+                this.ctx = ctx;
+            }
+            init(){
+                this.opacity = this.obj.opacity || this.ctx.opacity;
+                this.color = this.obj.color || this.ctx.color;
+                this.fontSize = this.obj.fontSize || this.ctx.fontSize;
+                this.speed = this.obj.speed || this.ctx.speed;
+
+                // 求出自己本身宽度，用于校检是否继续绘制
+                let span = document.createElement('span');
+                span.innerText = this.value;
+                span.style.font = this.fontSize + 'px "Microsoft YaHei" ';
+                span.style.position = 'absolute';
+                document.body.appendChild(span);
+                // 记录弹幕宽度
+                this.width = span.clientWidth;
+                document.body.removeChild(span);
+
+                // 弹幕出现位置
+                this.x = this.ctx.canvas.width;
+                this.y = this.ctx.canvas.height * Math.random();
+
+                if(this.y < this.fontSize){
+                    this.y = this.fontSize;
+                }
+                if(this.y > (this.ctx.canvas.height - this.fontSize)){
+                    this.y = (this.ctx.canvas.height - this.fontSize);
+                }
+            }
+
+            /**
+             * 渲染自己 将自己绘制在画布上
+             */
+            render(){
+                this.ctx.context.font = this.fontSize + 'px "Microsoft YaHei" ';
+                // 当前弹幕透明度
+
+                this.ctx.context.fillStyle = this.color;
+                this.ctx.context.fillText(this.value,this.x,this.y);
+            }
+        }
+
+        class CanvasBarrage {
+            constructor(canvas,video,options = {}) {
+                if(!canvas || !video){
+                    return;
+                }
+                this.canvas = canvas;
+                this.video = video;
+                // 默认值
+                let defaultOptions = {
+                    fontSize:20,    // 字体大小
+                    color:'gold',   // 字体颜色
+                    speed:2,        // 速度
+                    opacity:0.3,    // 阴影透明度
+                    data:[]
+                }
+
+                // 对象的合并，将属性全部挂载到实例上
+                Object.assign(this,defaultOptions,options);
+
+                // 获取 canvas 画布
+                this.context = canvas.getContext('2d');
+
+                // 设置画布宽高
+                this.canvas.width = this.video.clientWidth;
+                this.canvas.height = this.video.clientHeight;
+
+                // 是否暂停
+                this.isPaused = true;   // 默认暂停播放，表示不渲染弹幕
+
+                // 存放所有弹幕, Barrage是创造弹幕的实例类
+                this.barrages = this.data.map(obj => new Barrage(obj,this));
+
+                // 渲染弹幕
+                this.render();
+            }
+
+
+            /**
+             * 渲染弹幕
+             */
+            renderBarrage(){
+                // 将数组中的弹幕一个一个取出，判断时间和视频时间是否符合，符合就执行渲染此弹幕
+                // 当前弹幕时间
+                let videoTime = this.video.currentTime;
+                this.barrages.forEach(barrage => {
+                    // 当前video 时间 大于等于弹幕时间则此弹幕出现
+                    if(!barrage.flag && videoTime >= barrage.time){
+
+                        // 弹幕初始化 初始化后进行绘 如果没有初始化则先进行初始化操作
+                        if(!barrage.isInited){
+                            barrage.init();
+                            barrage.isInited = true;
+                        }
+
+                        barrage.x -= barrage.speed;
+                        barrage.render(); // 渲染自己
+
+                        if(barrage.x < barrage.width * -1){
+                            barrage.flag = true; // 停止渲染
+                        }
+                    }
+                })
+            }
+
+            /**
+             * 渲染弹幕
+             */
+            render(){
+                // 第一次先清空画布，执行渲染弹幕，如果没有暂停则继续渲染
+                this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+
+                // 渲染弹幕
+                this.renderBarrage();
+
+                if(!this.isPaused){
+                    // 通过动画递归渲染弹幕
+                    requestAnimationFrame(this.render.bind(this));
+                }
+
+            }
+
+            /**
+             * 添加弹幕
+             * @param obj
+             */
+            add(obj){
+                this.barrages.push(new Barrage(obj,this));
+            }
+
+            reset(){
+                // 首先要进行画布清空
+                this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+                // 弹幕重置 当前视频进度移动后获得当前视频时间
+                let time = this.video.currentTime;
+                this.barrages.forEach(barrage => {
+                    barrage.flag = false;
+                    // 重新初始化 其他弹幕不在继续渲染
+                    time <= barrage.time ? barrage.isInited = false : barrage.flag = true;
+                })
+
+            }
+
+        }
+
+        let canvasBarrage = new CanvasBarrage(canvas,video,{data});
+
+        video.addEventListener('play',() => {
+                canvasBarrage.isPaused = false;
+                canvasBarrage.render();
+        });
+        video.addEventListener('pause',() => {
+            canvasBarrage.isPaused = true;
+        });
+
+        $('#btn').addEventListener('click',() => {
+            let value = $('#text').value;
+            let color = $('#color').value;
+            // 当前视频时间
+            let time = video.currentTime;
+            if(trim(value) === null || trim(value) === ''){
+                alert('弹幕内容不能为空哦~');
+                return;
+            }
+            // 重置输入框
+            $('#text').value = '';
+
+            // 封装弹幕对象
+            let  obj = {time,value,color};
+
+            // 发送WebSocket请求到后端
+            if(typeof (WebSocket) == 'undefined'){
+                console.log('您的浏览器不支持WebSocket');
+                return;
+            }
+            let socket = new WebSocket('ws://127.0.0.1:8091/spring-ws/ws/asset');
+
+            socket.onopen = function (e) {
+                console.log('连接成功');
+                console.log(e);
+            }
+
+            // 添加弹幕
+            canvasBarrage.add(obj);
+        });
+
+        /**
+         * 视频进度拖动事件
+         */
+        video.addEventListener('seeked',() =>{
+            canvasBarrage.reset();
+        })
+
+
+
+
+
+
+    </script>
 </body>
 </html>
