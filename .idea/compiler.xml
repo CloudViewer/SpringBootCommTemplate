@@ -9,10 +9,12 @@
         <outputRelativeToContentRoot value="true" />
         <module name="SpringBoot-Ehcache" />
         <module name="SpringBoot-WebSocket" />
+        <module name="sp-dubbo" />
         <module name="SpringBoot-Redis" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="sp-dubbo" target="1.8" />
       <module name="SpringBoot-Ehcache" target="1.8" />
       <module name="SpringBoot-Redis" target="1.8" />
       <module name="SpringBoot-WebSocket" target="1.8" />
@@ -23,6 +25,7 @@
       <module name="SpringBoot-Ehcache" options="-parameters" />
       <module name="SpringBoot-Redis" options="-parameters" />
       <module name="SpringBoot-WebSocket" options="-parameters" />
+      <module name="sp-dubbo" options="" />
     </option>
   </component>
 </project>

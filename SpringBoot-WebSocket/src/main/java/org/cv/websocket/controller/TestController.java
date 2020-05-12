@@ -1,7 +1,11 @@
 package org.cv.websocket.controller;
 
+import org.cv.websocket.service.DbRoomService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
 
 /**
  * Created by Ale on 2020/4/1
@@ -10,18 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/sys")
 public class TestController {
 
-//    @ResponseBody
-//    @RequestMapping("/sys")
-//    public ResponseMsg<Object> onConnect(){
-//        // 进行链接
-//
-//
-//
-//
-//        // 默认是false
-//        return new ResponseMsg<>();
-//    }
+    @Resource
+    private DbRoomService service;
 
+    @ResponseBody
+    @RequestMapping("/all")
+    public Object findRoomByAll(){
+        return service.findByAll();
+    }
 
     @RequestMapping("/index")
     public String onIndex(){

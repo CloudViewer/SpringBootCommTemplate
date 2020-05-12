@@ -73,22 +73,27 @@
         let $ = document.querySelector.bind(document);
         let canvas = $('#canvas');
         let video = $('#video');
+        let socket = new WebSocket('ws://127.0.0.1:8091/spring-ws/ws/asset');
 
 
         class Barrage {
             constructor(obj,ctx) {
                 this.value = obj.value; // 这是弹幕内容
-                this.time = obj.time;   // 这是弹幕时间
+                this.time = obj.time;   // 这是弹幕时间 在视频的多少时长时进行渲染
                 this.obj = obj;
                 this.ctx = ctx;
             }
+
+            /**
+             *  弹幕初始化
+             */
             init(){
                 this.opacity = this.obj.opacity || this.ctx.opacity;
                 this.color = this.obj.color || this.ctx.color;
                 this.fontSize = this.obj.fontSize || this.ctx.fontSize;
                 this.speed = this.obj.speed || this.ctx.speed;
 
-                // 求出自己本身宽度，用于校检是否继续绘制
+                // 求出自己本身宽度，用于校检是否继续绘制 利用span来显示弹幕的宽度
                 let span = document.createElement('span');
                 span.innerText = this.value;
                 span.style.font = this.fontSize + 'px "Microsoft YaHei" ';
@@ -100,11 +105,15 @@
 
                 // 弹幕出现位置
                 this.x = this.ctx.canvas.width;
+                // 随机出现在y轴
                 this.y = this.ctx.canvas.height * Math.random();
 
+                // 如果y轴位置小与当前字体大小 那么Y轴位置就是当前字体大小位置，目的：防止弹幕不完整性,也就是显示一半
                 if(this.y < this.fontSize){
                     this.y = this.fontSize;
                 }
+
+                // 当前画布高度减去字体大小 小于当前Y轴的位置话，则当前y轴 = (画布高度 - 字体大小)
                 if(this.y > (this.ctx.canvas.height - this.fontSize)){
                     this.y = (this.ctx.canvas.height - this.fontSize);
                 }
@@ -114,22 +123,28 @@
              * 渲染自己 将自己绘制在画布上
              */
             render(){
+                // 设置字体样式
                 this.ctx.context.font = this.fontSize + 'px "Microsoft YaHei" ';
                 // 当前弹幕透明度
-
+                // 颜色
                 this.ctx.context.fillStyle = this.color;
+                // 将弹幕绘制在画布上
                 this.ctx.context.fillText(this.value,this.x,this.y);
             }
         }
 
         class CanvasBarrage {
+            // 弹幕渲染 需要传入canvas 与 video 弹幕内容
             constructor(canvas,video,options = {}) {
                 if(!canvas || !video){
                     return;
                 }
+
+                // 给本身添加 canvas 与 video
                 this.canvas = canvas;
                 this.video = video;
-                // 默认值
+
+                // 默认值 默认情况下弹幕具有一些默认属性 比如字体,颜色 弹幕加载速度,弹幕阴影
                 let defaultOptions = {
                     fontSize:20,    // 字体大小
                     color:'gold',   // 字体颜色
@@ -148,7 +163,7 @@
                 this.canvas.width = this.video.clientWidth;
                 this.canvas.height = this.video.clientHeight;
 
-                // 是否暂停
+                // 视频是否播放
                 this.isPaused = true;   // 默认暂停播放，表示不渲染弹幕
 
                 // 存放所有弹幕, Barrage是创造弹幕的实例类
@@ -256,10 +271,21 @@
                 console.log('您的浏览器不支持WebSocket');
                 return;
             }
-            let socket = new WebSocket('ws://127.0.0.1:8091/spring-ws/ws/asset');
 
-            socket.onopen = function (e) {
+            /**
+             * 客户端连接服务端
+             * e:服务端返回消息
+             */
+            socket.onopen = (e) => {
+                // 发送消息前要确保连接处于打开状态
+                // console.log(socket.readyState)
+                socket.send("客户端发送消息");
                 console.log('连接成功');
+                console.log(e);
+            }
+
+
+            socket.onmessage = (e) =>{
                 console.log(e);
             }
 
