@@ -3,8 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/SpringBoot-Ehcache/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SpringBoot-Redis/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/SpringBoot-Security/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/SpringBoot-WebSocket/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/sp-dubbo/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/sp-dubbo/src/main/resources" charset="UTF-8" />
   </component>
 </project>
