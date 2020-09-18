@@ -7,24 +7,35 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="SpringBoot-Ehcache" />
         <module name="SpringBoot-WebSocket" />
-        <module name="sp-dubbo" />
+        <module name="dubbo-api" />
         <module name="SpringBoot-Redis" />
+        <module name="SpringBoot-Security" />
+        <module name="SpringBoot-Ehcache" />
+        <module name="sp-dubbo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="dubbo-api" target="1.8" />
+      <module name="service-interface" target="1.8" />
       <module name="sp-dubbo" target="1.8" />
+      <module name="SpringBoot-Dubbo" target="1.8" />
+      <module name="Springboot-dubbo" target="1.8" />
       <module name="SpringBoot-Ehcache" target="1.8" />
       <module name="SpringBoot-Redis" target="1.8" />
+      <module name="SpringBoot-Security" target="1.8" />
       <module name="SpringBoot-WebSocket" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="SpringBoot-Dubbo" options="-parameters" />
       <module name="SpringBoot-Ehcache" options="-parameters" />
       <module name="SpringBoot-Redis" options="-parameters" />
+      <module name="SpringBoot-Security" options="-parameters" />
       <module name="SpringBoot-WebSocket" options="-parameters" />
+      <module name="dubbo-api" options="-parameters" />
+      <module name="service-interface" options="-parameters" />
       <module name="sp-dubbo" options="" />
     </option>
   </component>

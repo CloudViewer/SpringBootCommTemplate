@@ -9,7 +9,14 @@
         <option value="$PROJECT_DIR$/SpringBoot-Redis/pom.xml" />
         <option value="$PROJECT_DIR$/SpringBoot-Ehcache/pom.xml" />
         <option value="$PROJECT_DIR$/SpringBoot-WebSocket/pom.xml" />
+        <option value="$PROJECT_DIR$/Spring-Dubbo/service-interface/pom.xml" />
+        <option value="$PROJECT_DIR$/SpringBoot-Security/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/SpringBoot-Dubbo/dubbo-api/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK" />
