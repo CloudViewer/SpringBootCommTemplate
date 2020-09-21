@@ -313,4 +313,14 @@ public class ESUtils {
         Pattern p = Pattern.compile(regex);
         return p.matcher(val).matches();
     }
+
+
+    public static boolean isMobile(String mobile){
+        if(mobile.trim().isEmpty() || mobile == null){
+            return false;
+        }
+
+        // TODO:正则验证
+        return true;
+    }
 }

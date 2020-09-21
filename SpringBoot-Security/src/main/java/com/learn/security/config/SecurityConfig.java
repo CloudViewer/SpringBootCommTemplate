@@ -1,5 +1,6 @@
 package com.learn.security.config;
 
+import com.learn.security.config.handler.ESLogoutSuccessHandler;
 import com.learn.security.config.handler.ErrorHandler;
 import com.learn.security.config.handler.ExpiredSessionStrategyHandler;
 import com.learn.security.config.handler.SuccessHandler;
@@ -16,8 +17,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 
 /**
  * Created by Ale on 2020/9/14
@@ -31,7 +35,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true) // 启用方法安全设置
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    public class SecurityConfig extends WebSecurityConfigurerAdapter {
     Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
 
@@ -42,7 +46,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private ErrorHandler errorHandler;
 
     @Resource
-    UserDetailsService userDetailsService;
+    private ESLogoutSuccessHandler esLogoutSuccessHandler;
+
+    @Resource
+    private UserDetailsService userDetailsService;
+
+    @Resource
+    private DataSource dataSource;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -59,12 +69,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
          * formLogin
          * SpringSecurity会帮我们验证用户名密码，所以我们不在需要编写控制器去验证，
          * 只需在SpringSecurity配置登录地址即可
+         * logout 的默认行为
+         *  1、使当前session失效 logout核心）
+         *  2、删除remember-me
+         *  3、清除当前SecurityContext
+         *  4、重定向到登录页
          */
-        // 1 登录验证配置 关闭跨站访问攻击
-        http.rememberMe()
+        http.logout()
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler(esLogoutSuccessHandler) // 自定义退出处理
+                .and()
+                .rememberMe()
                 .rememberMeParameter("remember_me_new") // 参数设置
                 .rememberMeCookieName("ESRememberCookie") // cookie名称
                 .tokenValiditySeconds(2 * 24 * 60 * 60)   // 过期时间,多长时间不用再次登录
+                .tokenRepository(persistentTokenRepository())   // 把用户对应cookie信息存入数据库
                 .and()
                     .csrf().disable()
                 .formLogin()
@@ -164,5 +183,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder(){
         // 对密码进行编码解码
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(){
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource);
+        return tokenRepository;
     }
 }
